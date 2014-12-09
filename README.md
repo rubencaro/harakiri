@@ -18,19 +18,19 @@ Actions can be:
 Add to your `Mixfile` like this:
 
 ```
-{:harakiri, github: "elpulgardelpanda/harakiri"}
+    {:harakiri, github: "elpulgardelpanda/harakiri"}
 ```
 
 Add it to a supervisor like this:
 
 ```elixir
-opts =[ paths: ["file1","file2"], app: :myapp, action: :reload ]
+    opts =[ paths: ["file1","file2"], app: :myapp, action: :reload ]
 
-#...
+    #...
 
-worker( Harakiri, [opts] ),
+    worker( Harakiri, [opts] ),
 
-#...
+    #...
 
 ```
 
