@@ -24,7 +24,7 @@ Add to your `Mixfile` like this:
 Add it to a supervisor like this:
 
 ```elixir
-    opts =[ paths: ["file1","file2"], app: :myapp, action: :reload ]
+    opts =[ paths: ["file1","file2"], app: :myapp, action: :restart ]
 
     #...
 
