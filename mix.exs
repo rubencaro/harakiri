@@ -4,12 +4,10 @@ defmodule Harakiri.Mixfile do
   def project do
     [app: :harakiri,
      version: "0.1.0",
-     elixir: "~> 1.0.0",
-     deps: deps]
+     elixir: "~> 1.0.0"]
   end
 
   def application do
-    [applications: [:logger],
-     mod: {Harakiri, []}]
+    [applications: [:logger]]
   end
 end

@@ -14,7 +14,7 @@ defmodule Harakiri do
 
     Add it to a supervisor like this:
     ```
-    opts =[ paths: ["file1","file2"], app: :myapp, action: :reload ]
+    opts =[ paths: ["file1","file2"], app: :myapp, action: :restart ]
     worker( Harakiri, [opts] ),
     ```
   """
