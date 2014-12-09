@@ -17,18 +17,24 @@ Actions can be:
 
 Add to your `Mixfile` like this:
 
-    ```
-    {:harakiri, github: "elpulgardelpanda/harakiri"}
-    ```
+```
+{:harakiri, github: "elpulgardelpanda/harakiri"}
+```
 
 Add it to a supervisor like this:
 
-    ```elixir
-    opts =[ paths: ["file1","file2"], app: :myapp, action: :reload ]
-    ...
-    worker( Harakiri, [opts] ),
-    ...
-    ```
+```elixir
+opts =[ paths: ["file1","file2"], app: :myapp, action: :reload ]
+
+#...
+
+worker( Harakiri, [opts] ),
+
+#...
+
+```
+
+All given files must exist.
 
 ## TODOs
 
@@ -36,6 +42,7 @@ Add it to a supervisor like this:
 * Add to hex
 * Write some minimal testing
 * Add to travis
+* Optional creation of watched files.
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
 * Support for multiple action sets on the same Harakiri process.
