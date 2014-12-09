@@ -34,7 +34,11 @@ worker( Harakiri, [opts] ),
 
 ```
 
-All given files must exist.
+All given files (`file1`, `file2`, etc.) must exist.
+
+## Demo
+
+https://asciinema.org/a/14560
 
 ## TODOs
 
