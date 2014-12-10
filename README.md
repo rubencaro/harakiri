@@ -15,23 +15,18 @@ Actions can be:
 
 ## Use
 
-Add to your `Mixfile` like this:
+Add to your `aplications` list to ensure it's up before your app starts.
 
-```
+Add to your `deps` like this:
+
+```elixir
     {:harakiri, github: "elpulgardelpanda/harakiri"}
 ```
 
-Add it to a supervisor like this:
+Add an _action group_ like this:
 
 ```elixir
-    opts =[ paths: ["file1","file2"], app: :myapp, action: :restart ]
-
-    #...
-
-    worker( Harakiri, [opts] ),
-
-    #...
-
+    Harakiri.add paths: ["file1","file2"], app: :myapp, action: :restart
 ```
 
 All given files (`file1`, `file2`, etc.) must exist.
