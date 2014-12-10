@@ -110,6 +110,7 @@ defmodule Harakiri.Worker do
 
   def check_file(path, ag) do
     new_mtime = File.stat!(path[:path]).mtime
+    IO.inspect new_mtime
     if path[:mtime] && (path[:mtime] != new_mtime) do
       fire(ag.action, ag.app)
     end

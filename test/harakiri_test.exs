@@ -23,7 +23,7 @@ defmodule HarakiriTest do
     :ok = Worker.add %ActionGroup{paths: ["/tmp/bogus"], app: :bogus, action: :stop}
 
     # now it's looping, but no hits
-    :timer.sleep 2
+    :timer.sleep 1_000
     [%ActionGroup{metadata: md}] = Worker.state
     assert md[:loops] > 0
     assert md[:hits] == 0
@@ -31,8 +31,12 @@ defmodule HarakiriTest do
     # touch file
     :os.cmd 'touch /tmp/bogus'
 
+    IO.inspect Worker.state
+
     # now it's been fired once
-#     :timer.sleep 2_000
+    :timer.sleep 2_000
+
+    IO.inspect Worker.state
 #     [%ActionGroup{metadata: md}] = Worker.state
 #     assert md[:loops] > 0
 #     assert md[:hits] == 1
