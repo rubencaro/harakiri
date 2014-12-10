@@ -43,7 +43,7 @@ defmodule Harakiri.Worker do
     Init callback, spawn the loop process and return the state
   """
   def init(:ok) do
-    spawn_link fn -> loop end
+    spawn_link fn -> loop(Application.get_env(:harakiri, :loop_sleep_ms)) end
     {:ok, []}
   end
 
@@ -85,22 +85,27 @@ defmodule Harakiri.Worker do
     Perform harakiri if given file is touched. Else keep an infinite loop
     sleeping given msecs each time.
   """
-  def loop(sleep_ms \\ 5_000) do
+  def loop(sleep_ms) do
     for ag <- state, into: [] do
+
       # check every path
       checked_paths = for p <- ag.paths, into: [] do
         new_mtime = check_file(p,ag)
         [path: p[:path], mtime: new_mtime, hit: p[:mtime] != new_mtime]
       end
+
       # save new mtimes
       paths = for p <- checked_paths, into: [], do: [path: p[:path], mtime: p[:mtime]]
+
       # update metadata
       md = ag.metadata
       hit = Enum.reduce(checked_paths, false, fn(p,acc) -> p[:hit] or acc end)
       if hit, do: md = Keyword.put(md, :hits, md[:hits] + 1)
       md = Keyword.put(md, :loops, md[:loops] + 1)
+
       %{ ag | paths: paths, metadata: md }
     end |> state
+
     :timer.sleep sleep_ms
     loop sleep_ms
   end

@@ -2,7 +2,7 @@ alias Harakiri.Worker
 alias Harakiri.ActionGroup
 
 defmodule HarakiriTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   test "adds, gets, and clears state" do
     # call it with no state
@@ -21,12 +21,21 @@ defmodule HarakiriTest do
     # setup ActionGroup
     :os.cmd 'touch /tmp/bogus' # create it
     :ok = Worker.add %ActionGroup{paths: ["/tmp/bogus"], app: :bogus, action: :stop}
-    # now it's looping
+
+    # now it's looping, but no hits
+    :timer.sleep 2
+    [%ActionGroup{metadata: md}] = Worker.state
+    assert md[:loops] > 0
+    assert md[:hits] == 0
 
     # touch file
     :os.cmd 'touch /tmp/bogus'
 
-    # now it's been fired
+    # now it's been fired once
+    :timer.sleep 2_000
+    [%ActionGroup{metadata: md}] = Worker.state
+    assert md[:loops] > 0
+    assert md[:hits] == 1
   end
 
 end
