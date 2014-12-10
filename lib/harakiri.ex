@@ -1,5 +1,3 @@
-require Logger
-
 defmodule Harakiri do
   use Application
 
@@ -120,16 +118,16 @@ defmodule Harakiri.Worker do
 
   def fire(:stop,app) do
     res = Application.stop(app)
-    Logger.info "Stopped #{app}... #{inspect res}"
+    IO.puts "Stopped #{app}... #{inspect res}"
     res = Application.unload app
-    Logger.info "Unloaded #{app}... #{inspect res}"
+    IO.puts "Unloaded #{app}... #{inspect res}"
     :ok
   end
 
   def fire(:restart, app) do
     fire :stop, app
     res = Application.ensure_all_started app
-    Logger.info "Started #{app}... #{inspect res}"
+    IO.puts "Started #{app}... #{inspect res}"
     :ok
   end
 end

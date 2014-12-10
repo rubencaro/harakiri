@@ -8,7 +8,6 @@ defmodule Harakiri.Mixfile do
   end
 
   def application do
-    [applications: [:logger],
-     mod: {Harakiri, []}]
+    [mod: {Harakiri, []}]
   end
 end
