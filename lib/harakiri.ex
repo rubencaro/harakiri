@@ -14,7 +14,7 @@ defmodule Harakiri do
 end
 
 defmodule Harakiri.ActionGroup do
-  defstruct paths: [], app: nil, action: nil
+  defstruct paths: [], app: nil, action: nil, metadata: [loops: 0, hits: 0]
 end
 
 defmodule Harakiri.Worker do
@@ -87,20 +87,29 @@ defmodule Harakiri.Worker do
   """
   def loop(sleep_ms \\ 5_000) do
     for ag <- state, into: [] do
-      Logger.debug inspect(ag)
-      paths = for p <- ag.paths, into: [] do
-        [path: p[:path], mtime: check_file(p,ag)]
+      # check every path
+      checked_paths = for p <- ag.paths, into: [] do
+        new_mtime = check_file(p,ag)
+        [path: p[:path], mtime: new_mtime, hit: p[:mtime] != new_mtime]
       end
-      Logger.debug inspect(paths)
-      %{ ag | paths: paths }
+      # save new mtimes
+      paths = for p <- checked_paths, into: [], do: [path: p[:path], mtime: p[:mtime]]
+      # update metadata
+      md = ag.metadata
+      hit = Enum.reduce(checked_paths, false, fn(p,acc) -> p[:hit] or acc end)
+      if hit, do: md = Keyword.put(md, :hits, md[:hits] + 1)
+      md = Keyword.put(md, :loops, md[:loops] + 1)
+      %{ ag | paths: paths, metadata: md }
     end |> state
     :timer.sleep sleep_ms
     loop sleep_ms
   end
 
-  def check_file(path, %ActionGroup{action: action, app: app}) do
+  def check_file(path, ag) do
     new_mtime = File.stat!(path[:path]).mtime
-    if path[:mtime] && (path[:mtime] != new_mtime), do: fire(action, app)
+    if path[:mtime] && (path[:mtime] != new_mtime) do
+      fire(ag.action, ag.app)
+    end
     new_mtime
   end
 
