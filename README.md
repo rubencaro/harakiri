@@ -5,8 +5,8 @@ files change on disk (i.e. a gentle `touch` is enough), then the given action
 is fired over the app. `Harakiri` was concieved to help applications kill
 themselves in response to a `touch` to a file on disk. Hence the name.
 
-Everything is in a supervisable `GenServer` so you can easily add it to your
-supervision tree.
+Everything is in an OTP Application so you can have it running in your
+system to help all your other applications kill themselves.
 
 Actions can be:
 
@@ -29,7 +29,7 @@ Add an _action group_ like this:
     Harakiri.add paths: ["file1","file2"], app: :myapp, action: :restart
 ```
 
-All given files (`file1`, `file2`, etc.) must exist.
+You are done. All given files (`file1`, `file2`, etc.) must exist.
 
 ## Demo
 
