@@ -54,7 +54,7 @@ defmodule Harakiri.Worker do
   def add(data) when is_map(data) do
     data = %ActionGroup{} |> Map.merge data # put into an ActionGroup
     paths = for p <- data.paths, into: [] do
-      [path: p, mtime: File.stat!(p).mtime]
+      [path: p, mtime: get_file_mtime(p)]
     end
     data = %{data | paths: paths}
     GenServer.call(:harakiri_server,{:add, data})
@@ -109,12 +109,16 @@ defmodule Harakiri.Worker do
   end
 
   def check_file(path, ag) do
-    new_mtime = File.stat!(path[:path]).mtime
-    IO.inspect new_mtime
+    new_mtime = get_file_mtime path[:path]
     if path[:mtime] && (path[:mtime] != new_mtime) do
       fire(ag.action, ag.app)
     end
     new_mtime
+  end
+
+  def get_file_mtime(path) do
+    :os.cmd('ls -l --time-style=full-iso #{path}')
+    |> to_string |> String.split |> Enum.at(6)
   end
 
   def fire(:stop,app) do
