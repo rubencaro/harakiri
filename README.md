@@ -26,7 +26,7 @@ Add to your `deps` like this:
 Add an _action group_ like this:
 
 ```elixir
-    Harakiri.add %{paths: ["file1","file2"], app: :myapp, action: :restart}
+    Harakiri.Worker.add %{paths: ["file1","file2"], app: :myapp, action: :restart}
 ```
 
 You are done. All given files (`file1`, `file2`, etc.) must exist.
