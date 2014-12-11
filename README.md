@@ -33,7 +33,7 @@ You are done. All given files (`file1`, `file2`, etc.) must exist.
 
 ## Demo
 
-https://asciinema.org/a/14560
+http://asciinema.org/a/14616
 
 ## TODOs
 
