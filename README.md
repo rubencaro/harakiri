@@ -39,8 +39,8 @@ https://asciinema.org/a/14560
 
 * Get it stable on production
 * Add to hex
-* Write some minimal testing
 * Add to travis
+* Use ETS to preserve state
 * Optional creation of watched files.
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
