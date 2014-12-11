@@ -21,6 +21,7 @@ defmodule HarakiriTest do
     # setup ActionGroup
     :os.cmd 'touch /tmp/bogus' # create it
     :ok = Worker.add %ActionGroup{paths: ["/tmp/bogus"], app: :bogus, action: :stop}
+    :ok = Worker.add %{paths: ["/tmp/bogus2"], app: :bogus2, action: :stop}
 
     # now it's looping, but no hits
     :timer.sleep 100
