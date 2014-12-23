@@ -37,6 +37,7 @@ http://asciinema.org/a/14617
 
 ## TODOs
 
+* Allow only one instance of the same action group.
 * Get it stable on production
 * Add to hex
 * Add to travis
