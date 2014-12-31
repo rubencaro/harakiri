@@ -1,5 +1,6 @@
 alias Harakiri.Worker
 alias Harakiri.ActionGroup
+alias TestHelpers, as: TH
 
 defmodule HarakiriTest do
   use ExUnit.Case, async: false
@@ -24,19 +25,19 @@ defmodule HarakiriTest do
     :ok = Worker.add %{paths: ["/tmp/bogus2"], app: :bogus2, action: :stop}
 
     # now it's looping, but no hits
-    :timer.sleep 100
-    [%ActionGroup{metadata: md}] = Worker.state
-    assert md[:loops] > 0
-    assert md[:hits] == 0
+    TH.wait_for fn ->
+      %ActionGroup{metadata: md} = Worker.state |> List.first
+      md[:loops] > 0 and md[:hits] == 0
+    end
 
     # touch file
     :os.cmd 'touch /tmp/bogus'
 
     # now it's been fired once
-    :timer.sleep 100
-    [%ActionGroup{metadata: md}] = Worker.state
-    assert md[:loops] > 0
-    assert md[:hits] == 1
+    TH.wait_for fn ->
+      %ActionGroup{metadata: md} = Worker.state |> List.first
+      md[:loops] > 0 and md[:hits] == 1
+    end
   end
 
 end
