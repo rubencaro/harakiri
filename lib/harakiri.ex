@@ -41,7 +41,7 @@ defmodule Harakiri.Worker do
     Init callback, spawn the loop process and return the state
   """
   def init(:ok) do
-    spawn_link fn -> loop(Application.get_env(:harakiri, :loop_sleep_ms)) end
+    spawn_link fn -> loop(Application.get_env(:harakiri, :loop_sleep_ms, 5_000)) end
     {:ok, []}
   end
 
