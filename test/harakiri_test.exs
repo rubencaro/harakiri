@@ -40,4 +40,14 @@ defmodule HarakiriTest do
     end
   end
 
+  test "stop does not crash" do
+    ag = %{paths: ["/tmp/bogus"], app: :bogus, action: :stop} |> Worker.digest_data
+    :ok = Worker.fire :stop, ag
+  end
+
+  test "reload does not crash" do
+    ag = %{paths: ["/tmp/bogus"], app: :bogus, action: :reload} |> Worker.digest_data
+    :ok = Worker.fire :reload, ag
+  end
+
 end

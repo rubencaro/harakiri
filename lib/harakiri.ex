@@ -12,7 +12,11 @@ defmodule Harakiri do
 end
 
 defmodule Harakiri.ActionGroup do
-  defstruct paths: [], app: nil, action: nil, metadata: [loops: 0, hits: 0]
+  defstruct paths: [],
+            app: nil,
+            action: nil,
+            lib_path: nil,
+            metadata: [loops: 0, hits: 0]
 end
 
 defmodule Harakiri.Worker do
@@ -26,11 +30,11 @@ defmodule Harakiri.Worker do
     Actions can be:
 
     * `:stop`: `Application.stop/1` and `Application.unload/1` are called.
-    * `:restart`: like `:stop` and then `Application.ensure_all_started/1`.
+    * `:reload`: like `:stop` and then `Application.ensure_all_started/1`.
 
     Add an _action group_ like this:
     ```
-    Harakiri.add paths: ["file1","file2"], app: :myapp, action: :restart
+    Harakiri.add paths: ["file1","file2"], app: :myapp, action: :reload
     ```
     You can pass an `ActionGroup` as well instead of a plain `Map`.
   """
@@ -48,16 +52,32 @@ defmodule Harakiri.Worker do
   @doc """
     Add given data as an _action group_. It should be a `Map`.
     ```
-    Harakiri.add %{paths: ["file1","file2"], app: :myapp, action: :restart}
+    Harakiri.add %{paths: ["file1","file2"],
+                   app: :myapp,
+                   action: :reload,
+                   lib_path: "path"}
     ```
   """
   def add(data) when is_map(data) do
+    data = digest_data data
+    GenServer.call(:harakiri_server,{:add, data})
+  end
+
+  @doc """
+    Gets a `Map` and puts it into an `ActionGroup` just the way `Harakiri`
+    needs it.
+
+    The `Map` should look like:
+    ```
+    %{paths: ["file1","file2"], app: :myapp, action: :reload, lib_path: "path"}
+    ```
+  """
+  def digest_data(data) when is_map(data) do
     data = %ActionGroup{} |> Map.merge data # put into an ActionGroup
     paths = for p <- data.paths, into: [] do
       [path: p, mtime: get_file_mtime(p)]
     end
-    data = %{data | paths: paths}
-    GenServer.call(:harakiri_server,{:add, data})
+    %{data | paths: paths}
   end
 
   @doc """
@@ -111,7 +131,7 @@ defmodule Harakiri.Worker do
   def check_file(path, ag) do
     new_mtime = get_file_mtime path[:path]
     if path[:mtime] && (path[:mtime] != new_mtime) do
-      fire(ag.action, ag.app)
+      fire(ag.action, ag)
     end
     new_mtime
   end
@@ -121,18 +141,22 @@ defmodule Harakiri.Worker do
     |> to_string |> String.split |> Enum.at(6)
   end
 
-  def fire(:stop,app) do
-    res = Application.stop(app)
-    IO.puts "Stopped #{app}... #{inspect res}"
-    res = Application.unload app
-    IO.puts "Unloaded #{app}... #{inspect res}"
+  def fire(:stop, ag) do
+    res = Application.stop(ag.app)
+    IO.puts "Stopped #{ag.app}... #{inspect res}"
+    res = Application.unload ag.app
+    IO.puts "Unloaded #{ag.app}... #{inspect res}"
+    res = :code.del_path(ag.app)
+    IO.puts "Removed from path #{ag.app}... #{inspect res}"
     :ok
   end
 
-  def fire(:restart, app) do
-    fire :stop, app
-    res = Application.ensure_all_started app
-    IO.puts "Started #{app}... #{inspect res}"
+  def fire(:reload, ag) do
+    :ok = fire :stop, ag
+    res = :code.add_patha('#{ag.lib_path}/ebin')
+    IO.puts "Added to path #{ag.app}... #{inspect res}"
+    res = Application.ensure_all_started ag.app
+    IO.puts "Started #{ag.app}... #{inspect res}"
     :ok
   end
 end

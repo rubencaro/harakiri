@@ -1,4 +1,4 @@
-# Harakiri
+# Harakiri (BETA)
 
 Given a list of _files_, an _application_, and an _action_. When any of the
 files change on disk (i.e. a gentle `touch` is enough), then the given action
@@ -10,8 +10,9 @@ system to help all your other applications kill themselves.
 
 Actions can be:
 
-* `:stop`: `Application.stop/1` and `Application.unload/1` are called.
-* `:restart`: like `:stop` and then `Application.ensure_all_started/1`.
+* `:stop`: Stops, unloads and deletes app's entry from path.
+* `:reload`: like `:stop`, then adds given `lib_path` to path and runs
+`Application.ensure_all_started/1`.
 
 ## Use
 
@@ -26,7 +27,10 @@ Add to your `deps` like this:
 Add an _action group_ like this:
 
 ```elixir
-    Harakiri.Worker.add %{paths: ["file1","file2"], app: :myapp, action: :restart}
+    Harakiri.Worker.add %{paths: ["file1","file2"],
+                          app: :myapp,
+                          action: :reload,
+                          lib_path: "path"}
 ```
 
 You are done. All given files (`file1`, `file2`, etc.) must exist.
@@ -47,3 +51,4 @@ http://asciinema.org/a/14617
 * Support for several actions on each action set.
 * Support for multiple action sets on the same Harakiri process.
 * More actions, or even support for funs.
+* Deeper test, complete deploy/upgrade/reload simulation
