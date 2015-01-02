@@ -160,7 +160,7 @@ defmodule Harakiri.Worker do
     :ok
   end
 
-  def fire(:restart, ag) do
+  def fire(:restart, _ag) do
     res = :init.restart
     IO.puts "Scheduled system restart... #{inspect res}"
     :ok
