@@ -15,6 +15,13 @@ Actions can be:
 `Application.ensure_all_started/1`.
 * `:restart`: Restarts the whole VM, runs `:init.restart`.
 
+The `stop` and `reload` actions are suited for quick operations over a single
+application, not its dependencies. No other application is stopped and removed
+from path. `reload` will ensure all dependencies are started before the app as
+it uses `ensure_all_started`, but it will not bother adding them to the path.
+So any dependency that changed will most probably not start because it will be
+missing from path.
+
 ## Use
 
 Add to your `aplications` list to ensure it's up before your app starts.
@@ -34,7 +41,9 @@ Add an _action group_ like this:
                           lib_path: "path"}
 ```
 
-You are done. All given files (`file1`, `file2`, etc.) must exist.
+You are done. All given files (`file1`, `file2`, etc.) must exist. `lib_path` is
+the path to the folder containing the `ebin` folder for the current version of
+the app, usually a link to it.
 
 ## Demo
 
