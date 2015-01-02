@@ -13,6 +13,7 @@ Actions can be:
 * `:stop`: Stops, unloads and deletes app's entry from path.
 * `:reload`: like `:stop`, then adds given `lib_path` to path and runs
 `Application.ensure_all_started/1`.
+* `:restart`: Restarts the whole VM, runs `:init.restart`.
 
 ## Use
 
