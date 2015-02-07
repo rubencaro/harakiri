@@ -1,6 +1,7 @@
 # Harakiri (BETA)
 
 [![Build Status](https://travis-ci.org/elpulgardelpanda/harakiri.svg?branch=master)](https://travis-ci.org/elpulgardelpanda/harakiri)
+[![Hex Version](http://img.shields.io/hexpm/v/harakiri.svg?style=flat)](https://hex.pm/packages/harakiri)
 
 Given a list of _files_, an _application_, and an _action_. When any of the
 files change on disk (i.e. a gentle `touch` is enough), then the given action
@@ -55,7 +56,6 @@ http://asciinema.org/a/14617
 
 * Allow only one instance of the same action group.
 * Get it stable on production
-* Add to hex
 * Use ETS to preserve state
 * Optional creation of watched files.
 * Support for multiple apps on each action set.
