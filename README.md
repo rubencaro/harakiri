@@ -46,13 +46,33 @@ Add an _action group_ like this:
 ```elixir
     Harakiri.Worker.add %{paths: ["file1","file2"],
                           app: :myapp,
+                          action: :stop}
+```
+
+That would only stop `:myapp`. To also reload it:
+
+```elixir
+    Harakiri.Worker.add %{paths: ["file1","file2"],
+                          app: :myapp,
                           action: :reload,
                           lib_path: "path"}
 ```
 
 You are done. All given files (`file1`, `file2`, etc.) must exist. `lib_path` is
 the path to the folder containing the `ebin` folder for the current version of
-the app, usually a link to it.
+the app, usually a link to it. `lib_path` is only needed by `:reload`. 
+
+If your app is the main one in the Erlang node, then you may consider a whole `:restart`:
+
+```elixir
+    Harakiri.Worker.add %{paths: ["/path/to/tmp/restart"],
+                          app: :myapp,
+                          action: :restart}
+```
+
+That would restart the VM. I.e. stop every application and start them again. All without 
+stopping the running node, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
+
 
 ## Demo
 
