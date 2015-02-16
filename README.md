@@ -32,6 +32,12 @@ Add to your `aplications` list to ensure it's up before your app starts.
 Add to your `deps` like this:
 
 ```elixir
+    {:harakiri, ">= 0.2.0"}
+```
+
+Or if you feel brave enough:
+
+```elixir
     {:harakiri, github: "elpulgardelpanda/harakiri"}
 ```
 
