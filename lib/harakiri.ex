@@ -94,7 +94,11 @@ defmodule Harakiri.Worker do
   @doc """
     Server callbacks
   """
-  def handle_call({:add, new_ag}, _from, data), do: {:reply, :ok, data ++ [new_ag]}
+  def handle_call({:add, new_ag}, _from, data) do
+    if new_ag in data, # if it's already there
+      do: {:reply, :duplicate, data}, # do not add again
+      else: {:reply, :ok, data ++ [new_ag]} # add as usual
+  end
   def handle_call(:state, _from, data), do: {:reply, data, data}
   def handle_call({:state,data}, _from, _data), do: {:reply, :ok, data}
   def handle_call(:clear, _from, _data), do: {:reply, :ok, []}

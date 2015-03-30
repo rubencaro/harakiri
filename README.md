@@ -60,7 +60,7 @@ That would only stop `:myapp`. To also reload it:
 
 You are done. All given files (`file1`, `file2`, etc.) must exist. `lib_path` is
 the path to the folder containing the `ebin` folder for the current version of
-the app, usually a link to it. `lib_path` is only needed by `:reload`. 
+the app, usually a link to it. `lib_path` is only needed by `:reload`.
 
 If your app is the main one in the Erlang node, then you may consider a whole `:restart`:
 
@@ -70,7 +70,7 @@ If your app is the main one in the Erlang node, then you may consider a whole `:
                           action: :restart}
 ```
 
-That would restart the VM. I.e. stop every application and start them again. All without 
+That would restart the VM. I.e. stop every application and start them again. All without
 stopping the running node, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
 
 
@@ -80,7 +80,6 @@ http://asciinema.org/a/14617
 
 ## TODOs
 
-* Allow only one instance of the same action group.
 * Get it stable on production
 * Use ETS to preserve state
 * Optional creation of watched files.
@@ -89,3 +88,13 @@ http://asciinema.org/a/14617
 * Support for multiple action sets on the same Harakiri process.
 * More actions, or even support for funs.
 * Deeper test, complete deploy/upgrade/reload simulation
+
+## Changelog
+
+### 0.3.0
+
+* Allow only one instance of the same action group.
+
+### 0.2.0
+
+* First release

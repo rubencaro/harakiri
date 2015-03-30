@@ -11,7 +11,9 @@ defmodule HarakiriTest do
     # put some state
     data = %ActionGroup{paths: [], app: :bogus, action: :stop}
     :ok = Worker.add data
-    # check it's there
+    # the second time it's not duplicated
+    :duplicate = Worker.add data
+    # check it's there, only one
     assert [data] == Worker.state
     # clear and chek it's gone
     :ok = Worker.clear
