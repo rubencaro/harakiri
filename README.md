@@ -76,7 +76,7 @@ stopping the running node, so it's fast enough for most cases. See [init.restart
 
 ## Demo
 
-http://asciinema.org/a/14617
+[![asciicast](https://asciinema.org/a/14617.png)](https://asciinema.org/a/14617)
 
 ## TODOs
 
