@@ -6,6 +6,11 @@ defmodule Harakiri do
   """
   def start(_,_) do
     import Supervisor.Spec, warn: false
+
+    # start ETS named_table from here,
+    # thus make it persistent as long as the VM runs (Harakiri should be `permanent`...)
+    :ets.new(:harakiri_table, [:public,:set,:named_table])
+
     opts = [strategy: :one_for_one, name: Harakiri.Supervisor]
     Supervisor.start_link([worker(Harakiri.Worker, [])], opts)
   end

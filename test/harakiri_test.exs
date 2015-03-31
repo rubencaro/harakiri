@@ -52,4 +52,15 @@ defmodule HarakiriTest do
     :ok = Worker.fire :reload, ag
   end
 
+  test "The supervisor ancestor owns the ETS table" do
+    # the table exists
+    refute :ets.info(:harakiri_table) == :undefined
+    # get the owner
+    owner = :ets.info(:harakiri_table)[:owner]
+    # get the supervisor ancestor
+    info = Process.whereis(Harakiri.Supervisor) |> Process.info
+    sup_ancestor = info[:dictionary][:"$ancestors"] |> List.first
+    assert owner == sup_ancestor
+  end
+
 end
