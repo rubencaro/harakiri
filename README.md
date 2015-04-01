@@ -81,6 +81,7 @@ stopping the running node, so it's fast enough for most cases. See [init.restart
 ## TODOs
 
 * Get it stable on production
+* Rearrange using a supervised `Task` for the main loop and regular helpers to access the ETS table. No need for a `GenServer` anymore.
 * Use ETS to preserve state
 * Optional creation of watched files.
 * Support for multiple apps on each action set.
