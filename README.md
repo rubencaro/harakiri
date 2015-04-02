@@ -3,10 +3,9 @@
 [![Build Status](https://travis-ci.org/elpulgardelpanda/harakiri.svg?branch=master)](https://travis-ci.org/elpulgardelpanda/harakiri)
 [![Hex Version](http://img.shields.io/hexpm/v/harakiri.svg?style=flat)](https://hex.pm/packages/harakiri)
 
-Given a list of _files_, an _application_, and an _action_. When any of the
-files change on disk (i.e. a gentle `touch` is enough), then the given action
-is fired over the app. `Harakiri` was concieved to help applications kill
-themselves in response to a `touch` to a file on disk. Hence the name.
+`Harakiri` was concieved to help applications kill themselves in response to a `touch` to a file on disk.
+
+Given a list of _files_, an _application_, and an _action_. When any of the files change on disk (i.e. a gentle `touch` is enough), then the given action is fired over the app.
 
 Everything is in an OTP Application so you can have it running in your
 system to help all your other applications kill themselves.
@@ -18,21 +17,20 @@ Actions can be:
 `Application.ensure_all_started/1`.
 * `:restart`: Restarts the whole VM, runs `:init.restart`.
 
-The `stop` and `reload` actions are suited for quick operations over a single
-application, not its dependencies. No other application is stopped and removed
-from path. `reload` will ensure all dependencies are started before the app as
-it uses `ensure_all_started`, but it will not bother adding them to the path.
-So any dependency that changed will most probably not start because it will be
-missing from path.
+The `stop` and `reload` actions are suited for quick operations over a single application, not its dependencies. No other application is stopped and removed from path.
+
+`reload` will ensure all dependencies are started before the app as it uses `ensure_all_started`, but it will not bother adding them to the path. So any dependency that changed will most probably not start because it will be missing from path.
+
+The `restart` action is suited for a project deployed as the main application in the entire VM. `:init.restart` will kill all applications and then restart them all again.
 
 ## Use
 
-Add to your `aplications` list to ensure it's up before your app starts.
+Add to your `applications` list to ensure it's up before your app starts.
 
-Add to your `deps` like this:
+Then add to your `deps` like this:
 
 ```elixir
-    {:harakiri, ">= 0.2.0"}
+    {:harakiri, ">= 0.4.0"}
 ```
 
 Or if you feel brave enough:
@@ -44,34 +42,31 @@ Or if you feel brave enough:
 Add an _action group_ like this:
 
 ```elixir
-    Harakiri.Worker.add %{paths: ["file1","file2"],
-                          app: :myapp,
-                          action: :stop}
+    Harakiri.add %{paths: ["file1","file2"],
+                   app: :myapp,
+                   action: :stop}
 ```
 
 That would only stop `:myapp`. To also reload it:
 
 ```elixir
-    Harakiri.Worker.add %{paths: ["file1","file2"],
-                          app: :myapp,
-                          action: :reload,
-                          lib_path: "path"}
+    Harakiri.add %{paths: ["file1","file2"],
+                   app: :myapp,
+                   action: :reload,
+                   lib_path: "path"}
 ```
 
-You are done. All given files (`file1`, `file2`, etc.) must exist. `lib_path` is
-the path to the folder containing the `ebin` folder for the current version of
-the app, usually a link to it. `lib_path` is only needed by `:reload`.
+You are done. All given files (`file1`, `file2`, etc.) must exist. `lib_path` is the path to the folder containing the `ebin` folder for the current version of the app, usually a link to it. `lib_path` is only needed by `:reload`.
 
 If your app is the main one in the Erlang node, then you may consider a whole `:restart`:
 
 ```elixir
-    Harakiri.Worker.add %{paths: ["/path/to/tmp/restart"],
-                          app: :myapp,
-                          action: :restart}
+    Harakiri.add %{paths: ["/path/to/tmp/restart"],
+                   app: :myapp,
+                   action: :restart}
 ```
 
-That would restart the VM. I.e. stop every application and start them again. All without
-stopping the running node, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
+That would restart the VM. I.e. stop every application and start them again. All without stopping the running node, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
 
 
 ## Demo
@@ -81,8 +76,6 @@ stopping the running node, so it's fast enough for most cases. See [init.restart
 ## TODOs
 
 * Get it stable on production
-* Rearrange using a supervised `Task` for the main loop and regular helpers to access the ETS table. No need for a `GenServer` anymore.
-* Use ETS to preserve state
 * Optional creation of watched files.
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
@@ -91,6 +84,11 @@ stopping the running node, so it's fast enough for most cases. See [init.restart
 * Deeper test, complete deploy/upgrade/reload simulation
 
 ## Changelog
+
+### 0.4.0
+
+* Use ETS to preserve state
+* Rearrange using a supervised `Task` for the main loop and regular helpers to access the ETS table. No need for a `GenServer` anymore.
 
 ### 0.3.0
 
