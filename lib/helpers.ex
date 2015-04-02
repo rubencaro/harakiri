@@ -40,25 +40,71 @@ defmodule Harakiri.Helpers do
   def digest_data(data) when is_map(data) do
     data = %Harakiri.ActionGroup{} |> Map.merge data # put into an ActionGroup
     paths = for p <- data.paths, into: [] do
-      [path: p, mtime: Harakiri.Worker.get_file_mtime(p)]
+      [path: p, mtime: get_file_mtime(p)]
     end
     %{data | paths: paths}
   end
 
   @doc """
-    Generate de md5 hash to be used as key for the ETS table
+    Get the key to be used as on the ETS table
   """
-  def md5_key(data) do
-    # whatever it is, make it hashable
-    hdata = data |> inspect |> to_char_list
-    :crypto.hash :md5, hdata
+  def get_key(data), do: [data.app, data.action] |> inspect |> to_char_list
+
+  @doc """
+    Insert given data to `:harakiri_table`.md5_key(data)
+    Returns `{:ok, key}` if inserted, `:duplicate` if given data existed.
+  """
+  def insert(data) when is_map(data) do
+    key = get_key(data)
+    if :ets.insert_new(:harakiri_table, {key, data}),
+      do: {:ok, key},
+      else: :duplicate
   end
 
   @doc """
-    Insert given data to `:harakiri_table`
+    Insert the given data on the table. Update if it was lready there.
   """
-  def insert(data) when is_map(data) do
-    :ets.insert(:harakiri_table, {md5_key(data), data})
+  def upsert(data) when is_map(data) do
+    true = :ets.insert(:harakiri_table, {get_key(data), data})
+    :ok
+  end
+
+  @doc """
+    Get first row from the table
+  """
+  def first, do: lookup(:ets.first(:harakiri_table))
+
+  @doc """
+    Get the row for the given key, if it exists. If given key is
+    `:"$end_of_table"` it will return `nil`.
+  """
+  def lookup(key) do
+    case key do
+      :"$end_of_table" -> nil
+      _ ->
+        [{_, data}] = :ets.lookup(:harakiri_table, key)
+        data
+    end
+  end
+
+  @doc """
+    Get all rows in the table. This is fine, since we will have little rows.
+  """
+  def get_chained_next(key, state \\ []) do
+    case lookup(key) do
+      nil -> state
+      data ->
+        next = :ets.next(:harakiri_table, key)
+        get_chained_next(next, state ++ [data])
+    end
+  end
+
+  @doc """
+    Get mtime from the OS for the given path
+  """
+  def get_file_mtime(path) do
+    :os.cmd('ls -l --time-style=full-iso #{path}')
+    |> to_string |> String.split |> Enum.at(6)
   end
 
 end

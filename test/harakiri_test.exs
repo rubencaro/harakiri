@@ -12,7 +12,7 @@ defmodule HarakiriTest do
     :ok = Hk.clear
     # put some state
     data = %ActionGroup{paths: [], app: :bogus, action: :stop}
-    :ok = Hk.add data
+    {:ok,_} = Hk.add data
     # the second time it's not duplicated
     :duplicate = Hk.add data
     # check it's there, only one
@@ -25,22 +25,32 @@ defmodule HarakiriTest do
   test "fires given action when touching one of given files" do
     # setup ActionGroup
     :os.cmd 'touch /tmp/bogus' # create it
-    :ok = Hk.add %ActionGroup{paths: ["/tmp/bogus"], app: :bogus, action: :stop}
-    :ok = Hk.add %{paths: ["/tmp/bogus2"], app: :bogus2, action: :stop}
+    # add the ActionGroup
+    {:ok, key} = Hk.add %ActionGroup{paths: ["/tmp/bogus"], app: :bogus, action: :stop}
+    # also accept as a regular map
+    {:ok, key2} = Hk.add %{paths: ["/tmp/bogus2"], app: :bogus2, action: :stop}
 
-    # now it's looping, but no hits
-    TH.wait_for fn ->
-      %ActionGroup{metadata: md} = Hk.state |> List.first
-      md[:loops] > 0 and md[:hits] == 0
+    # now it's looping, but no hits for anyone
+    for k <- [key,key2] do
+      TH.wait_for fn ->
+        %ActionGroup{metadata: md} = H.lookup(k)
+        md[:loops] > 0 and md[:hits] == 0
+      end
     end
 
     # touch file
     :os.cmd 'touch /tmp/bogus'
 
-    # now it's been fired once
+    # now bogus it's been fired once
     TH.wait_for fn ->
-      %ActionGroup{metadata: md} = Hk.state |> List.first
+      %ActionGroup{metadata: md} = H.lookup(key)
       md[:loops] > 0 and md[:hits] == 1
+    end
+
+    # not the second bogus
+    TH.wait_for fn ->
+      %ActionGroup{metadata: md} = H.lookup(key2)
+      md[:loops] > 0 and md[:hits] == 0
     end
   end
 

@@ -22,28 +22,27 @@ defmodule Harakiri do
   @doc """
     Add given data as an _action group_. It should be a `Map`.
     ```
-    Harakiri.add %{paths: ["file1","file2"],
-                   app: :myapp,
-                   action: :reload,
-                   lib_path: "path"}
+    {:ok, key} = Harakiri.add %{paths: ["file1","file2"],
+                               app: :myapp,
+                               action: :reload,
+                               lib_path: "path"}
     ```
   """
-  def add(data) when is_map(data) do
-    data |> H.digest_data |> H.insert
-  end
+  def add(data) when is_map(data), do: data |> H.digest_data |> H.insert
 
   @doc """
     Get/set all Harakiri state
   """
-  def state do
-    :ets.all(:harakiri_table) |> Enum.map( fn({_,data})-> data end)
-  end
-  def state(data), do: for( d <- data, do: H.insert d )
+  def state, do: H.get_chained_next(:ets.first(:harakiri_table))
+  def state(data), do: for( d <- data, do: :ok = H.upsert(d) )
 
   @doc """
     Clear all Harakiri state
   """
-  def clear, do: :ets.delete_all_objects(:harakiri_table)
+  def clear do
+    true = :ets.delete_all_objects(:harakiri_table)
+    :ok
+  end
 end
 
 defmodule Harakiri.Worker do
@@ -78,16 +77,11 @@ defmodule Harakiri.Worker do
   end
 
   defp check_file(path, ag) do
-    new_mtime = get_file_mtime path[:path]
+    new_mtime = H.get_file_mtime path[:path]
     if path[:mtime] && (path[:mtime] != new_mtime) do
       fire(ag.action, ag)
     end
     new_mtime
-  end
-
-  defp get_file_mtime(path) do
-    :os.cmd('ls -l --time-style=full-iso #{path}')
-    |> to_string |> String.split |> Enum.at(6)
   end
 
   @doc """
