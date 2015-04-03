@@ -1,4 +1,6 @@
 require Harakiri.Helpers, as: H
+alias Harakiri, as: Hk
+alias Keyword, as: K
 
 defmodule Harakiri do
   use Application
@@ -7,7 +9,7 @@ defmodule Harakiri do
     Start and supervise a single lonely worker
   """
   def start(_,_) do
-    import Supervisor.Spec, warn: false
+    import Supervisor.Spec
 
     # start ETS named_table from here,
     # thus make it persistent as long as the VM runs (Harakiri should be `permanent`...)
@@ -15,18 +17,13 @@ defmodule Harakiri do
 
     loop_sleep_ms = Application.get_env(:harakiri, :loop_sleep_ms, 5_000)
 
-    opts = [strategy: :one_for_one, name: Harakiri.Supervisor]
-    Supervisor.start_link([ worker(Task, [Harakiri.Worker,:loop,[loop_sleep_ms]]) ], opts)
+    opts = [strategy: :one_for_one, name: Hk.Supervisor]
+    Supervisor.start_link([ worker(Task, [Hk.Worker,:loop,[loop_sleep_ms]]) ], opts)
   end
 
   @doc """
-    Add given data as an _action group_. It should be a `Map`.
-    ```
-    {:ok, key} = Harakiri.add %{paths: ["file1","file2"],
-                               app: :myapp,
-                               action: :reload,
-                               lib_path: "path"}
-    ```
+    Add given `Map` as an `Harakiri.ActionGroup`.
+    See README or tests for examples.
   """
   def add(data) when is_map(data), do: data |> H.digest_data |> H.insert
 
@@ -48,39 +45,48 @@ end
 defmodule Harakiri.Worker do
 
   @doc """
-    Perform harakiri if given file is touched. Else keep an infinite loop
-    sleeping given msecs each time.
+    Perform requested action if any given path is touched.
+    Else keep an infinite loop sleeping given msecs each time.
   """
   def loop(sleep_ms) do
-    for ag <- Harakiri.state, into: [] do
 
-      # check every path
+    # go over every ag and update them
+    updated_ags = for ag <- Hk.state, into: [] do
+
+      # check every path, calc new mtimes and metadata
       checked_paths = for p <- ag.paths, into: [] do
         new_mtime = check_file(p,ag)
         [path: p[:path], mtime: new_mtime, hit: p[:mtime] != new_mtime]
       end
 
-      # save new mtimes
-      paths = for p <- checked_paths, into: [], do: [path: p[:path], mtime: p[:mtime]]
+      # save new mtimes for paths
+      paths = for p <- checked_paths, into: [],
+                do: [path: p[:path], mtime: p[:mtime]]
 
       # update metadata
       md = ag.metadata
-      hit = Enum.reduce(checked_paths, false, fn(p,acc) -> p[:hit] or acc end)
-      if hit, do: md = Keyword.put(md, :hits, md[:hits] + 1)
-      md = Keyword.put(md, :loops, md[:loops] + 1)
+      md = K.put(md, :loops, md[:loops] + 1) # +1 loops
+      if Enum.any?(checked_paths, &(&1[:hit])), # if any path was hit
+        do: md = K.put(md, :hits, md[:hits] + 1) # +1 hits
 
+      # update ag's data
       %{ ag | paths: paths, metadata: md }
-    end |> Harakiri.state
+    end
 
+    # replace old ags with the new ones
+    Hk.state updated_ags
+
+    # sleep and loop
     :timer.sleep sleep_ms
     loop sleep_ms
   end
 
+  # Fire the corresponding function if any mtime changed
+  #
   defp check_file(path, ag) do
     new_mtime = H.get_file_mtime path[:path]
-    if path[:mtime] && (path[:mtime] != new_mtime) do
-      fire(ag.action, ag)
-    end
+    if path[:mtime] && (path[:mtime] != new_mtime),
+      do: fire(ag.action, ag)
     new_mtime
   end
 

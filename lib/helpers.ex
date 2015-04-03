@@ -39,9 +39,11 @@ defmodule Harakiri.Helpers do
   """
   def digest_data(data) when is_map(data) do
     data = %Harakiri.ActionGroup{} |> Map.merge data # put into an ActionGroup
-    paths = for p <- data.paths, into: [] do
-      [path: p, mtime: get_file_mtime(p)]
-    end
+
+    # one mtime for each path
+    paths = for p <- data.paths, into: [],
+      do: [path: p, mtime: get_file_mtime(p)]
+
     %{data | paths: paths}
   end
 
@@ -51,7 +53,7 @@ defmodule Harakiri.Helpers do
   def get_key(data), do: [data.app, data.action] |> inspect |> to_char_list
 
   @doc """
-    Insert given data to `:harakiri_table`.md5_key(data)
+    Insert given data into `:harakiri_table`.
     Returns `{:ok, key}` if inserted, `:duplicate` if given data existed.
   """
   def insert(data) when is_map(data) do
@@ -92,7 +94,7 @@ defmodule Harakiri.Helpers do
   """
   def get_chained_next(key, state \\ []) do
     case lookup(key) do
-      nil -> state
+      nil -> state |> Enum.sort
       data ->
         next = :ets.next(:harakiri_table, key)
         get_chained_next(next, state ++ [data])
