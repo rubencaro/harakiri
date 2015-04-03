@@ -71,7 +71,7 @@ That would restart the VM. I.e. stop every application and start them again. All
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/14617.png)](https://asciinema.org/a/14617)
+[![asciicast](https://asciinema.org/a/18338.png)](https://asciinema.org/a/18338)
 
 ## TODOs
 
