@@ -75,11 +75,10 @@ That would restart the VM. I.e. stop every application and start them again. All
 
 ## TODOs
 
-* Get it stable on production
+* Get it stable on production (and get 1.0.0 then!)
 * Optional creation of watched files.
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
-* Support for multiple action sets on the same Harakiri process.
 * More actions, or even support for funs.
 * Deeper test, complete deploy/upgrade/reload simulation
 
