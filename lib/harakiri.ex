@@ -15,10 +15,11 @@ defmodule Harakiri do
     # thus make it persistent as long as the VM runs (Harakiri should be `permanent`...)
     :ets.new(:harakiri_table, [:public,:set,:named_table])
 
-    loop_sleep_ms = Application.get_env(:harakiri, :loop_sleep_ms, 5_000)
+    loop_sleep_ms = H.env(:loop_sleep_ms, 5_000)
 
     opts = [strategy: :one_for_one, name: Hk.Supervisor]
-    Supervisor.start_link([ worker(Task, [Hk.Worker,:loop,[loop_sleep_ms]]) ], opts)
+    children = [ worker(Task, [Hk.Worker,:loop,[loop_sleep_ms]]) ]
+    Supervisor.start_link(children, opts)
   end
 
   @doc """
@@ -30,7 +31,7 @@ defmodule Harakiri do
   @doc """
     Get/set all Harakiri state
   """
-  def state, do: H.get_chained_next(:ets.first(:harakiri_table))
+  def state, do: :ets.first(:harakiri_table) |> H.get_chained_next
   def state(data), do: for( d <- data, do: :ok = H.upsert(d) )
 
   @doc """

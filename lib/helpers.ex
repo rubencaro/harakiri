@@ -13,7 +13,7 @@ defmodule Harakiri.Helpers do
     Convenience to get environment bits. Avoid all that repetitive
     `Application.get_env( :myapp, :blah, :blah)` noise.
   """
-  def env(key, default \\ nil), do: env(:syscrap, key, default)
+  def env(key, default \\ nil), do: env(:harakiri, key, default)
   def env(app, key, default), do: Application.get_env(app, key, default)
 
   @doc """
@@ -80,13 +80,10 @@ defmodule Harakiri.Helpers do
     Get the row for the given key, if it exists. If given key is
     `:"$end_of_table"` it will return `nil`.
   """
+  def lookup(:"$end_of_table"), do: nil
   def lookup(key) do
-    case key do
-      :"$end_of_table" -> nil
-      _ ->
-        [{_, data}] = :ets.lookup(:harakiri_table, key)
-        data
-    end
+    [{_, data}] = :ets.lookup(:harakiri_table, key)
+    data
   end
 
   @doc """
@@ -95,9 +92,8 @@ defmodule Harakiri.Helpers do
   def get_chained_next(key, state \\ []) do
     case lookup(key) do
       nil -> state |> Enum.sort
-      data ->
-        next = :ets.next(:harakiri_table, key)
-        get_chained_next(next, state ++ [data])
+      data -> :ets.next(:harakiri_table, key)
+                |> get_chained_next(state ++ [data])
     end
   end
 
