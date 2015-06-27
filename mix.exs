@@ -18,6 +18,6 @@ defmodule Harakiri.Mixfile do
   defp package do
     [contributors: ["Rubén Caro"],
      licenses: ["MIT"],
-     links: %{github: "https://github.com/elpulgardelpanda/harakiri"}]
+     links: %{github: "https://github.com/rubencaro/harakiri"}]
   end
 end
