@@ -55,12 +55,18 @@ defmodule Harakiri.Helpers do
   @doc """
     Insert given data into `:harakiri_table`.
     Returns `{:ok, key}` if inserted, `:duplicate` if given data existed.
+
+    If option `:create_paths` is truthy, then it tries to create every path
+    in data[:paths]. It returns `{:error, reason}` when that failed.
   """
-  def insert(data) when is_map(data) do
-    key = get_key(data)
-    if :ets.insert_new(:harakiri_table, {key, data}),
-      do: {:ok, key},
-      else: :duplicate
+  def insert(data, opts \\ []) when is_map(data) do
+    case opts[:create_paths] && create_paths(data.paths) do
+      x when is_nil(x) or x == :ok ->
+        key = get_key(data)
+        res = :ets.insert_new(:harakiri_table, {key, data})
+        if res, do: {:ok, key}, else: :duplicate
+      x -> x
+    end
   end
 
   @doc """
@@ -105,4 +111,26 @@ defmodule Harakiri.Helpers do
     |> to_string |> String.split |> Enum.at(6)
   end
 
+  # Call `create_path/1` for every path in given paths list
+  # Return `:ok` if success.
+  # Stop looping and return `{:error, reason}` if failed.
+  #
+  defp create_paths([]), do: :ok
+  defp create_paths([path|rest]) do
+    case create_path(path[:path]) do
+      :ok -> create_paths(rest)
+      x -> x
+    end
+  end
+
+  # Create folders and touch the file for the given path
+  # Returns `:ok` or `{:error, reason}`
+  #
+  defp create_path(path) do
+    res = path |> Path.dirname |> File.mkdir_p
+    case res do
+      :ok -> path |> File.touch
+      x -> x
+    end
+  end
 end

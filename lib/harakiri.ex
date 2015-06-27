@@ -26,7 +26,7 @@ defmodule Harakiri do
     Add given `Map` as an `Harakiri.ActionGroup`.
     See README or tests for examples.
   """
-  def add(data) when is_map(data), do: data |> H.digest_data |> H.insert
+  def add(data, opts \\ []) when is_map(data), do: data |> H.digest_data |> H.insert(opts)
 
   @doc """
     Get/set all Harakiri state

@@ -36,7 +36,7 @@ Then add to your `deps` like this:
 Or if you feel brave enough:
 
 ```elixir
-    {:harakiri, github: "elpulgardelpanda/harakiri"}
+    {:harakiri, github: "rubencaro/harakiri"}
 ```
 
 Add an _action group_ like this:
@@ -56,7 +56,7 @@ That would only stop `:myapp`. To also reload it:
                    lib_path: "path"}
 ```
 
-You are done. All given files (`file1`, `file2`, etc.) must exist. `lib_path` is the path to the folder containing the `ebin` folder for the current version of the app, usually a link to it. `lib_path` is only needed by `:reload`.
+You are done. All given files (`file1`, `file2`, etc.) must exist, unless you give the option `:create_paths`. Then all given paths will be created if they do not already exist. `lib_path` is the path to the folder containing the `ebin` folder for the current version of the app, usually a link to it. `lib_path` is only needed by `:reload`.
 
 If your app is the main one in the Erlang node, then you may consider a whole `:restart`:
 
@@ -76,13 +76,17 @@ That would restart the VM. I.e. stop every application and start them again. All
 ## TODOs
 
 * Get it stable on production (and get 1.0.0 then!)
-* Optional creation of watched files.
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
 * More actions, or even support for funs.
 * Deeper test, complete deploy/upgrade/reload simulation
 
 ## Changelog
+
+### 0.5.0
+
+* Support create paths when asked
+* Fix some testing inconsistency
 
 ### 0.4.0
 

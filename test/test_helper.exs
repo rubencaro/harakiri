@@ -16,4 +16,12 @@ defmodule TestHelpers do
     end
   end
 
+  @doc """
+     Remove :metadata key from given ag list. Useful to compare data on testing
+     when metadata may change over the time.
+  """
+  def remove_metadata(list) do
+    for ag <- list, into: [], do: Map.drop(ag,[:metadata])
+  end
+
 end

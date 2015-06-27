@@ -28,7 +28,7 @@ defmodule HarakiriTest do
     # the second time it's not duplicated
     :duplicate = Hk.add data
     # check it's there
-    assert [data,data2] == Hk.state
+    assert TH.remove_metadata([data,data2]) == TH.remove_metadata(Hk.state)
     # clear and chek it's gone
     :ok = Hk.clear
     assert [] == Hk.state
@@ -36,11 +36,11 @@ defmodule HarakiriTest do
 
   test "fires given action when touching one of given files" do
     # create the watched file
-    :os.cmd 'touch /tmp/bogus'
+    :os.cmd 'touch /tmp/bogus3'
     # add the ActionGroup
-    {:ok, key} = Hk.add %Hk.ActionGroup{paths: ["/tmp/bogus"], app: :bogus, action: :stop}
+    {:ok, key} = Hk.add %Hk.ActionGroup{paths: ["/tmp/bogus3"], app: :bogus3, action: :stop}
     # also accept as a regular map
-    {:ok, key2} = Hk.add %{paths: ["/tmp/bogus2"], app: :bogus2, action: :stop}
+    {:ok, key2} = Hk.add %{paths: ["/tmp/bogus4"], app: :bogus4, action: :stop}
 
     # now it's looping, but no hits for anyone
     for k <- [key,key2] do
@@ -51,7 +51,7 @@ defmodule HarakiriTest do
     end
 
     # touch file
-    :os.cmd 'touch /tmp/bogus'
+    :os.cmd 'touch /tmp/bogus3'
 
     # now bogus it's been fired once
     TH.wait_for fn ->
@@ -64,6 +64,19 @@ defmodule HarakiriTest do
       %{metadata: md} = H.lookup(key2)
       md[:loops] > 0 and md[:hits] == 0
     end
+  end
+
+  test "creates nonexistent watched paths if asked" do
+    paths = ["/tmp/bogus51","/tmp/bogus52"]
+
+    # ensure each file does not exist
+    for p <- paths, do: File.rm(p)
+
+    # add the ActionGroup passing `create_paths`
+    {:ok, _} = Hk.add %{paths: paths, app: :bogus5, action: :stop}, [create_paths: true]
+
+    # assert they exist now
+    for p <- paths, do: assert File.exists?(p)
   end
 
   test "stop does not crash" do
