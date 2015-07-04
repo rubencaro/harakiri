@@ -1,6 +1,6 @@
 # Harakiri   腹切   (BETA)
 
-[![Build Status](https://travis-ci.org/rubencaro/harakiri.svg?branch=master)](https://travis-ci.org/elpulgardelpanda/harakiri)
+[![Build Status](https://travis-ci.org/rubencaro/harakiri.svg?branch=master)](https://travis-ci.org/rubencaro/harakiri)
 [![Hex Version](http://img.shields.io/hexpm/v/harakiri.svg?style=flat)](https://hex.pm/packages/harakiri)
 
 `Harakiri` was concieved to help applications kill themselves in response to a `touch` to a file on disk.
