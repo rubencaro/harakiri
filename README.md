@@ -31,7 +31,7 @@ Add to your `applications` list to ensure it's up before your app starts.
 Then add to your `deps` like this:
 
 ```elixir
-    {:harakiri, ">= 0.5.0"}
+    {:harakiri, ">= 0.5.1"}
 ```
 
 Or if you feel brave enough:
@@ -83,6 +83,10 @@ That would restart the VM. I.e. stop every application and start them again. All
 * Deeper test, complete deploy/upgrade/reload simulation
 
 ## Changelog
+
+### 0.5.1
+
+* Set initial mtime for created files
 
 ### 0.5.0
 
