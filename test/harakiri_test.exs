@@ -73,10 +73,25 @@ defmodule HarakiriTest do
     for p <- paths, do: File.rm(p)
 
     # add the ActionGroup passing `create_paths`
-    {:ok, _} = Hk.add %{paths: paths, app: :bogus5, action: :stop}, [create_paths: true]
+    {:ok, k} = Hk.add %{paths: paths, app: :bogus5, action: :stop}, create_paths: true
 
     # assert they exist now
     for p <- paths, do: assert File.exists?(p)
+
+    # and they work as expected
+    TH.wait_for fn ->
+      %{metadata: md} = H.lookup(k)
+      md[:loops] > 0 and md[:hits] == 0
+    end
+
+    # touch file
+    :os.cmd 'touch /tmp/bogus51'
+
+    # now bogus it's been fired once
+    TH.wait_for fn ->
+      %{metadata: md} = H.lookup(k)
+      md[:loops] > 0 and md[:hits] == 1
+    end
   end
 
   test "stop does not crash" do

@@ -61,12 +61,23 @@ defmodule Harakiri.Helpers do
   """
   def insert(data, opts \\ []) when is_map(data) do
     case opts[:create_paths] && create_paths(data.paths) do
-      x when is_nil(x) or x == :ok ->
-        key = get_key(data)
-        res = :ets.insert_new(:harakiri_table, {key, data})
-        if res, do: {:ok, key}, else: :duplicate
+      :ok -> # paths created, need to set initial mtime
+        data |> set_initial_mtime |> do_insert
+      nil -> do_insert(data) # no create_paths, go on
       x -> x
     end
+  end
+
+  defp set_initial_mtime(data) do
+    paths = for p <- data.paths, into: [],
+              do: [path: p[:path], mtime: get_file_mtime(p[:path])]
+    %{data | paths: paths}
+  end
+
+  defp do_insert(data) do
+    key = get_key(data)
+    res = :ets.insert_new(:harakiri_table, {key, data})
+    if res, do: {:ok, key}, else: :duplicate
   end
 
   @doc """
