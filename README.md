@@ -31,7 +31,7 @@ Add to your `applications` list to ensure it's up before your app starts.
 Then add to your `deps` like this:
 
 ```elixir
-    {:harakiri, ">= 0.4.0"}
+    {:harakiri, ">= 0.5.0"}
 ```
 
 Or if you feel brave enough:
