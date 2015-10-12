@@ -4,7 +4,7 @@
 [![Hex Version](http://img.shields.io/hexpm/v/harakiri.svg?style=flat)](https://hex.pm/packages/harakiri)
 [![Hex Version](http://img.shields.io/hexpm/dt/harakiri.svg?style=flat)](https://hex.pm/packages/harakiri)
 
-`Harakiri` was concieved to help applications kill themselves in response to a `touch` to a file on disk.
+`Harakiri` was concieved to help applications kill themselves in response to a `touch` to a file on disk. It grew into something scarier.
 
 Given a list of _files_, an _application_, and an _action_. When any of the files change on disk (i.e. a gentle `touch` is enough), then the given action is fired over the app.
 
@@ -13,17 +13,11 @@ system to help all your other applications kill themselves.
 
 Actions can be:
 
+* Any anonymous function.
+* `:restart`: Restarts the whole VM, runs `:init.restart`.
 * `:stop`: Stops, unloads and deletes app's entry from path.
 * `:reload`: like `:stop`, then adds given `lib_path` to path and runs
 `Application.ensure_all_started/1`.
-* `:restart`: Restarts the whole VM, runs `:init.restart`.
-* Anonymous functions.
-
-The `stop` and `reload` actions are suited for quick operations over a single application, not its dependencies. No other application is stopped and removed from path.
-
-`reload` will ensure all dependencies are started before the app as it uses `ensure_all_started`, but it will not bother adding them to the path. So any dependency that changed will most probably not start because it will be missing from path.
-
-The `restart` action is suited for a project deployed as the main application in the entire VM. `:init.restart` will kill all applications and then restart them all again.
 
 ## Use
 
@@ -32,63 +26,49 @@ First of all, __add it to your `applications` list__ to ensure it's up before yo
 Then add to your `deps` like this:
 
 ```elixir
-    {:harakiri, ">= 0.6.0"}
-```
-
-Or if you feel brave enough:
-
-```elixir
-    {:harakiri, github: "rubencaro/harakiri"}
+{:harakiri, ">= 0.6.0"}
 ```
 
 Add an _action group_ like this:
 
 ```elixir
-    Harakiri.add %{paths: ["file1","file2"],
-                   app: :myapp,
-                   action: :stop}
+Harakiri.add %{paths: ["file1","file2"],
+               app: :myapp,
+               action: &MyModule.myfun}
 ```
 
-That would only stop `:myapp`. To also reload it:
+You are done. That would run `MyModule.myfun` when `file1` or `file2` are touched. All given files (`file1`, `file2`, etc.) must exist, unless you give the option `:create_paths`. Then all given paths will be created if they do not already exist.
 
-```elixir
-    Harakiri.add %{paths: ["file1","file2"],
-                   app: :myapp,
-                   action: :reload,
-                   lib_path: "path"}
-```
-
-You are done. All given files (`file1`, `file2`, etc.) must exist, unless you give the option `:create_paths`. Then all given paths will be created if they do not already exist. `lib_path` is the path to the folder containing the `ebin` folder for the current version of the app, usually a link to it. `lib_path` is only needed by `:reload`.
+## Whole VM restart
 
 If your app is the main one in the Erlang node, then you may consider a whole `:restart`:
 
 ```elixir
-    Harakiri.add %{paths: ["/path/to/tmp/restart"],
-                   app: :myapp,
-                   action: :restart}
+Harakiri.add %{paths: ["/path/to/tmp/restart"],
+               app: :myapp,
+               action: :restart}
 ```
 
-That would restart the VM. I.e. stop every application and start them again. All without stopping the running node, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
+That would restart the VM. I.e. stop every application and start them again. __All without stopping the running node__, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
 
 ## Anonymous functions
 
 If you need some specific function for your app to be cleanly accessible from outside your VM, then you can pass it as a function. To that function is passed a list with the whole `ActionGroup` and some info on the actual path that fired the event. Like this:
 
 ```elixir
+myfun = fn(data)->
+  # check the exact path that fired
+  case data[:file][:path] do
+    "/path/to/fire/myfun1" -> do_something1
+    "/path/to/fire/myfun2" -> do_something2
+  end
+  # see all the info you have
+  data |> inspect |> Logger.info
+end
 
-    myfun = fn(data)->
-      # check the exact path that fired
-      case data[:file][:path] do
-        "/path/to/fire/myfun1" -> do_something1
-        "/path/to/fire/myfun2" -> do_something2
-      end
-      # see all the info you have
-      data |> inspect |> Logger.info
-    end
-
-    Harakiri.add %{paths: ["/path/to/fire/myfun1","/path/to/fire/myfun2"],
-                   app: :myapp,
-                   action: myfun}
+Harakiri.add %{paths: ["/path/to/fire/myfun1","/path/to/fire/myfun2"],
+               app: :myapp,
+               action: myfun}
 ```
 
 This way you can code in pure elixir any complex process you need to perform on a production system. You could perform hot code swaps back and forth between releases of some module, go up&down logging levels, some weird maintenance task, etc. All with a simple `touch` of the right file.
@@ -96,6 +76,29 @@ This way you can code in pure elixir any complex process you need to perform on 
 If you perform an `echo` instead of a `touch`, then you could even do something with the contents of the file that fired.
 
 This is quite powerful. Enjoy it.
+
+## Shipped actions
+
+The `:restart` action is suited for a project deployed as the main application in the entire VM. `:init.restart` will kill all applications and then restart them all again.
+
+The `:stop` and `reload` actions are suited for quick operations over a single application, not its dependencies. For instance, `:stop` unloads and deletes the app's entry from path. No other application is stopped and removed from path.
+
+```elixir
+Harakiri.add %{paths: ["file1","file2"],
+               app: :myapp,
+               action: :stop}
+```
+
+`:reload` will ensure all dependencies are started before the app as it uses `ensure_all_started`, but it will not bother adding them to the path. So any dependency that changed will most probably not start because it will be missing from path.
+
+```elixir
+Harakiri.add %{paths: ["file1","file2"],
+               app: :myapp,
+               action: :reload,
+               lib_path: "path"}
+```
+
+`lib_path` is the path to the folder containing the `ebin` folder for the current version of the app, usually a link to it. `lib_path` is only needed by `:reload`.
 
 ## Demo
 
@@ -107,6 +110,7 @@ This is quite powerful. Enjoy it.
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
 * Deeper test, complete deploy/upgrade/reload simulation
+* Revise procedures (ex. `:app` is not really needed when action is a fun)
 
 ## Changelog
 
