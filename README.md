@@ -43,7 +43,6 @@ If your app is the main one in the Erlang node, then you may consider a whole `:
 
 ```elixir
 Harakiri.add %{paths: ["/path/to/tmp/restart"],
-               app: :myapp,
                action: :restart}
 ```
 
