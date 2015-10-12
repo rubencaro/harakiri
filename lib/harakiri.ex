@@ -87,14 +87,15 @@ defmodule Harakiri.Worker do
   defp check_file(path, ag) do
     new_mtime = H.get_file_mtime path[:path]
     if path[:mtime] && (path[:mtime] != new_mtime),
-      do: fire(ag.action, ag)
+      do: fire(ag.action, ag: ag, path: path)
     new_mtime
   end
 
   @doc """
     Fire the `:stop` callback for the given ActionGroup
   """
-  def fire(:stop, ag) do
+  def fire(:stop, data) do
+    ag = data[:ag]
     res = Application.stop(ag.app)
     IO.puts "Stopped #{ag.app}... #{inspect res}"
     res = Application.unload ag.app
@@ -107,8 +108,9 @@ defmodule Harakiri.Worker do
   @doc """
     Fire the `:reload` callback for the given ActionGroup
   """
-  def fire(:reload, ag) do
-    :ok = fire :stop, ag
+  def fire(:reload, data) do
+    ag = data[:ag]
+    :ok = fire :stop, data
     res = :code.add_patha('#{ag.lib_path}/ebin')
     IO.puts "Added to path #{ag.app}... #{inspect res}"
     res = Application.ensure_all_started ag.app
@@ -119,9 +121,19 @@ defmodule Harakiri.Worker do
   @doc """
     Fire the `:restart` callback for the given ActionGroup
   """
-  def fire(:restart, _ag) do
+  def fire(:restart, _data) do
     res = :init.restart
     IO.puts "Scheduled system restart... #{inspect res}"
     :ok
   end
+
+  @doc """
+    Fire the given anonymous function for the given ActionGroup
+  """
+  def fire(fun, data) when is_function(fun) do
+    res = fun.(data)
+    IO.puts "Running requested function... #{inspect res}"
+    :ok
+  end
+
 end

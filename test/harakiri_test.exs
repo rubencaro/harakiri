@@ -96,12 +96,41 @@ defmodule HarakiriTest do
 
   test "stop does not crash" do
     ag = %{paths: ["/tmp/bogus"], app: :bogus, action: :stop} |> H.digest_data
-    :ok = Hk.Worker.fire :stop, ag
+    :ok = Hk.Worker.fire :stop, ag: ag, path: "/tmp/bogus"
   end
 
   test "reload does not crash" do
     ag = %{paths: ["/tmp/bogus"], app: :bogus, action: :reload} |> H.digest_data
-    :ok = Hk.Worker.fire :reload, ag
+    :ok = Hk.Worker.fire :reload, ag: ag, path: "/tmp/bogus"
+  end
+
+  test "support for anonymous functions as action" do
+
+    Agent.start_link(fn -> :did_not_run end, name: :bogus6)
+    path = "/tmp/bogus6"
+
+    # function to be run
+    # makes some assertions and updates the Agent's state
+    fun = fn(data)->
+            assert data[:ag].app == :bogus6
+            assert data[:path][:path] == path
+            Agent.update(:bogus6, fn(_)-> :did_run end)
+          end
+
+    {:ok, k} = Hk.add %{paths: [path], app: :bogus6, action: fun},
+                      create_paths: true
+
+    # start the party
+    :os.cmd 'touch /tmp/bogus6'
+
+    # now bogus it's been fired once
+    TH.wait_for fn ->
+      %{metadata: md} = H.lookup(k)
+      md[:loops] > 0 and md[:hits] == 1
+    end
+
+    # it should have updated the Agent
+    TH.wait_for fn -> Agent.get(:bogus6, &(&1)) == :did_run end
   end
 
 end
