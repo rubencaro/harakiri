@@ -113,7 +113,7 @@ defmodule HarakiriTest do
     # makes some assertions and updates the Agent's state
     fun = fn(data)->
             assert data[:ag].app == :bogus6
-            assert data[:path][:path] == path
+            assert data[:file][:path] == path
             Agent.update(:bogus6, fn(_)-> :did_run end)
           end
 

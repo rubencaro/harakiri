@@ -1,4 +1,4 @@
-# Harakiri   腹切   (BETA)
+# Harakiri   腹切
 
 [![Build Status](https://travis-ci.org/rubencaro/harakiri.svg?branch=master)](https://travis-ci.org/rubencaro/harakiri)
 [![Hex Version](http://img.shields.io/hexpm/v/harakiri.svg?style=flat)](https://hex.pm/packages/harakiri)
@@ -17,6 +17,7 @@ Actions can be:
 * `:reload`: like `:stop`, then adds given `lib_path` to path and runs
 `Application.ensure_all_started/1`.
 * `:restart`: Restarts the whole VM, runs `:init.restart`.
+* Anonymous functions.
 
 The `stop` and `reload` actions are suited for quick operations over a single application, not its dependencies. No other application is stopped and removed from path.
 
@@ -26,12 +27,12 @@ The `restart` action is suited for a project deployed as the main application in
 
 ## Use
 
-Add to your `applications` list to ensure it's up before your app starts.
+First of all, __add it to your `applications` list__ to ensure it's up before your app starts.
 
 Then add to your `deps` like this:
 
 ```elixir
-    {:harakiri, ">= 0.5.1"}
+    {:harakiri, ">= 0.6.0"}
 ```
 
 Or if you feel brave enough:
@@ -69,6 +70,32 @@ If your app is the main one in the Erlang node, then you may consider a whole `:
 
 That would restart the VM. I.e. stop every application and start them again. All without stopping the running node, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
 
+## Anonymous functions
+
+If you need some specific function for your app to be cleanly accessible from outside your VM, then you can pass it as a function. To that function is passed a list with the whole `ActionGroup` and some info on the actual path that fired the event. Like this:
+
+```elixir
+
+    myfun = fn(data)->
+      # check the exact path that fired
+      case data[:file][:path] do
+        "/path/to/fire/myfun1" -> do_something1
+        "/path/to/fire/myfun2" -> do_something2
+      end
+      # see all the info you have
+      data |> inspect |> Logger.info
+    end
+
+    Harakiri.add %{paths: ["/path/to/fire/myfun1","/path/to/fire/myfun2"],
+                   app: :myapp,
+                   action: myfun}
+```
+
+This way you can code in pure elixir any complex process you need to perform on a production system. You could perform hot code swaps back and forth between releases of some module, go up&down logging levels, some weird maintenance task, etc. All with a simple `touch` of the right file.
+
+If you perform an `echo` instead of a `touch`, then you could even do something with the contents of the file that fired.
+
+This is quite powerful. Enjoy it.
 
 ## Demo
 
@@ -79,10 +106,13 @@ That would restart the VM. I.e. stop every application and start them again. All
 * Get it stable on production (and get 1.0.0 then!)
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
-* More actions, or even support for funs.
 * Deeper test, complete deploy/upgrade/reload simulation
 
 ## Changelog
+
+### 0.6.0
+
+* Support for anonymous functions as actions
 
 ### 0.5.1
 

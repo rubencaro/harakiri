@@ -87,7 +87,7 @@ defmodule Harakiri.Worker do
   defp check_file(path, ag) do
     new_mtime = H.get_file_mtime path[:path]
     if path[:mtime] && (path[:mtime] != new_mtime),
-      do: fire(ag.action, ag: ag, path: path)
+      do: fire(ag.action, ag: ag, file: path)
     new_mtime
   end
 
