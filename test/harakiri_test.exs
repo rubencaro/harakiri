@@ -112,13 +112,11 @@ defmodule HarakiriTest do
     # function to be run
     # makes some assertions and updates the Agent's state
     fun = fn(data)->
-            assert data[:ag].app == :bogus6
             assert data[:file][:path] == path
             Agent.update(:bogus6, fn(_)-> :did_run end)
           end
 
-    {:ok, k} = Hk.add %{paths: [path], app: :bogus6, action: fun},
-                      create_paths: true
+    {:ok, k} = Hk.add %{paths: [path], action: fun}, create_paths: true
 
     # start the party
     :os.cmd 'touch /tmp/bogus6'

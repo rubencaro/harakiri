@@ -32,9 +32,7 @@ Then add to your `deps` like this:
 Add an _action group_ like this:
 
 ```elixir
-Harakiri.add %{paths: ["file1","file2"],
-               app: :myapp,
-               action: &MyModule.myfun}
+Harakiri.add %{paths: ["file1","file2"], action: &MyModule.myfun}
 ```
 
 You are done. That would run `MyModule.myfun` when `file1` or `file2` are touched. All given files (`file1`, `file2`, etc.) must exist, unless you give the option `:create_paths`. Then all given paths will be created if they do not already exist.
@@ -67,7 +65,6 @@ myfun = fn(data)->
 end
 
 Harakiri.add %{paths: ["/path/to/fire/myfun1","/path/to/fire/myfun2"],
-               app: :myapp,
                action: myfun}
 ```
 
@@ -110,7 +107,6 @@ Harakiri.add %{paths: ["file1","file2"],
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
 * Deeper test, complete deploy/upgrade/reload simulation
-* Revise procedures (ex. `:app` is not really needed when action is a fun)
 
 ## Changelog
 
