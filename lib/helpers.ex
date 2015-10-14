@@ -113,17 +113,6 @@ defmodule Harakiri.Helpers do
   end
 
   @doc """
-    Get all rows in the table. This is fine, since we will have little rows.
-  """
-  def get_chained_next(key, state \\ []) do
-    case lookup(key) do
-      nil -> state |> Enum.sort
-      data -> :ets.next(:harakiri_table, key)
-                |> get_chained_next(state ++ [data])
-    end
-  end
-
-  @doc """
     Get mtime from the OS for the given path
   """
   def get_file_mtime(path) do

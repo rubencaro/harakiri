@@ -31,7 +31,11 @@ defmodule Harakiri do
   @doc """
     Get/set all Harakiri state
   """
-  def state, do: :ets.first(:harakiri_table) |> H.get_chained_next
+  def state do
+    :ets.tab2list(:harakiri_table)
+    |> Enum.sort
+    |> Enum.map(fn({_,ag})-> ag end)   # remove keys
+  end
   def state(data), do: for( d <- data, do: :ok = H.upsert(d) )
 
   @doc """
