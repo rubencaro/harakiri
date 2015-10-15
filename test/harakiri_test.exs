@@ -19,11 +19,7 @@ defmodule HarakiriTest do
     assert owner == sup_ancestor
   end
 
-  test "adds, gets, and clears state" do
-    # call it with no state
-    :ok = Hk.clear
-    assert [] == Hk.state
-
+  test "adds and gets state" do
     # put some state
     data = %Hk.ActionGroup{paths: [], app: :bogus, action: :stop}
     {:ok,_} = Hk.add data
@@ -33,12 +29,8 @@ defmodule HarakiriTest do
     # the second time it's not duplicated
     :duplicate = Hk.add data
 
-    # check it's there
-    assert TH.remove_metadata([data,data2]) == TH.remove_metadata(Hk.state)
-
-    # clear and check it's gone
-    :ok = Hk.clear
-    assert [] == Hk.state
+    # check it's there only once
+    assert 2 == Enum.count(Hk.state, fn(ag)-> ag.app in [:bogus, :bogus2] end)
   end
 
   test "fires given action when touching one of given files" do

@@ -37,12 +37,4 @@ defmodule Harakiri do
     |> Enum.map(fn({_,ag})-> ag end)   # remove keys
   end
   def state(data), do: for( d <- data, do: :ok = H.upsert(d) )
-
-  @doc """
-    Clear all Harakiri state
-  """
-  def clear do
-    true = :ets.delete_all_objects(:harakiri_table)
-    :ok
-  end
 end
