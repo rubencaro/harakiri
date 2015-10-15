@@ -3,13 +3,15 @@ require Harakiri.Helpers, as: H
 alias TestHelpers, as: TH
 
 defmodule HarakiriTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case
 
   test "The supervisor ancestor owns the ETS table" do
     # the table exists
     refute :ets.info(:harakiri_table) == :undefined
+
     # get the owner
     owner = :ets.info(:harakiri_table)[:owner]
+
     # get the supervisor ancestor
     info = Process.whereis(Harakiri.Supervisor) |> Process.info
     sup_ancestor = info[:dictionary][:"$ancestors"] |> List.first
@@ -20,16 +22,21 @@ defmodule HarakiriTest do
   test "adds, gets, and clears state" do
     # call it with no state
     :ok = Hk.clear
+    assert [] == Hk.state
+
     # put some state
     data = %Hk.ActionGroup{paths: [], app: :bogus, action: :stop}
     {:ok,_} = Hk.add data
     data2 = %Hk.ActionGroup{paths: [], app: :bogus2, action: :stop}
     {:ok,_} = Hk.add data2
+
     # the second time it's not duplicated
     :duplicate = Hk.add data
+
     # check it's there
     assert TH.remove_metadata([data,data2]) == TH.remove_metadata(Hk.state)
-    # clear and chek it's gone
+
+    # clear and check it's gone
     :ok = Hk.clear
     assert [] == Hk.state
   end
@@ -105,7 +112,6 @@ defmodule HarakiriTest do
   end
 
   test "support for anonymous functions as action" do
-
     Agent.start_link(fn -> :did_not_run end, name: :bogus6)
     path = "/tmp/bogus6"
 
