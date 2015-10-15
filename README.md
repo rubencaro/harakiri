@@ -109,6 +109,10 @@ Harakiri.add %{paths: ["file1","file2"],
 
 ## Changelog
 
+### master
+
+* Avoid race conditions with ETS on testing
+
 ### 0.6.0
 
 * Support for anonymous functions as actions
