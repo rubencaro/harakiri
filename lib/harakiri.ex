@@ -1,6 +1,5 @@
 require Harakiri.Helpers, as: H
 alias Harakiri, as: Hk
-alias Keyword, as: K
 
 defmodule Harakiri do
   use Application

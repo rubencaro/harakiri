@@ -39,7 +39,7 @@ defmodule Harakiri.Helpers do
     ```
   """
   def digest_data(data) when is_map(data) do
-    data = %Harakiri.ActionGroup{} |> Map.merge data # put into an ActionGroup
+    data = %Harakiri.ActionGroup{} |> Map.merge(data) # put into an ActionGroup
 
     # one mtime for each path
     paths = for p <- data.paths, into: [],
