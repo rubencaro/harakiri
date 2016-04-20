@@ -26,7 +26,7 @@ First of all, __add it to your `applications` list__ to ensure it's up before yo
 Then add to your `deps` like this:
 
 ```elixir
-{:harakiri, ">= 0.6.0"}
+{:harakiri, ">= 1.0.0"}
 ```
 
 Add an _action group_ like this:
@@ -46,7 +46,7 @@ Harakiri.add %{paths: ["/path/to/tmp/restart"],
                action: :restart}
 ```
 
-That would restart the VM. I.e. stop every application and start them again. __All without stopping the running node__, so it's fast enough for most cases. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
+That would restart the VM. I.e. stop every application and start them again. __All without stopping the running node__, so it's fast enough for most cases. It tipically takes around one second. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
 
 ## Anonymous functions
 
@@ -102,15 +102,15 @@ Harakiri.add %{paths: ["file1","file2"],
 
 ## TODOs
 
-* Get it stable on production (and get 1.0.0 then!)
 * Support for multiple apps on each action set.
 * Support for several actions on each action set.
 * Deeper test, complete deploy/upgrade/reload simulation
 
 ## Changelog
 
-### master
+### 1.0.0
 
+* Use it on several projects in production without problems
 * Avoid race conditions with ETS on testing
 
 ### 0.6.0
