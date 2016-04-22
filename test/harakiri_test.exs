@@ -93,6 +93,20 @@ defmodule HarakiriTest do
     end
   end
 
+  test "does not touch existing paths on start" do
+    # create file and get initial mtime
+    path = "/tmp/bogus7"
+    "touch #{path}" |> to_char_list |> :os.cmd
+    mtime = path |> H.get_file_mtime
+
+    # get Harakiri look over it passing `create_paths`
+    {:ok, k} = Hk.add %{paths: [path], app: :bogus7, action: :stop}, create_paths: true
+
+    # check mtime stays the same
+    mtime2 = path |> H.get_file_mtime
+    assert mtime == mtime2
+  end
+
   test "stop does not crash" do
     ag = %{paths: ["/tmp/bogus"], app: :bogus, action: :stop} |> H.digest_data
     :ok = Hk.Worker.fire :stop, ag: ag, path: "/tmp/bogus"

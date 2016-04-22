@@ -130,8 +130,14 @@ defmodule Harakiri.Helpers do
   defp create_path(path) do
     res = path |> Path.dirname |> File.mkdir_p
     case res do
-      :ok -> path |> File.touch
+      :ok -> path |> create_file
       x -> x
     end
+  end
+
+  # Touches given file path only if it does not exist
+  #
+  defp create_file(path) do
+    if not File.exists?(path), do: File.touch(path)
   end
 end
