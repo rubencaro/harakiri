@@ -108,6 +108,10 @@ Harakiri.add %{paths: ["file1","file2"],
 
 ## Changelog
 
+### 1.0.1
+
+* Do not touch already existing files on start
+
 ### 1.0.0
 
 * Use it on several projects in production without problems
