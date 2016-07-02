@@ -26,8 +26,9 @@ defmodule Harakiri.Worker do
       # update metadata
       md = ag.metadata
       md = K.put(md, :loops, md[:loops] + 1) # +1 loops
-      if Enum.any?(checked_paths, &(&1[:hit])), # if any path was hit
-        do: md = K.put(md, :hits, md[:hits] + 1) # +1 hits
+      md = if Enum.any?(checked_paths, &(&1[:hit])), # if any path was hit
+            do: K.put(md, :hits, md[:hits] + 1), # +1 hits
+            else: md
 
       # update ag's data
       %{ ag | paths: paths, metadata: md }

@@ -100,7 +100,7 @@ defmodule HarakiriTest do
     mtime = path |> H.get_file_mtime
 
     # get Harakiri look over it passing `create_paths`
-    {:ok, k} = Hk.add %{paths: [path], app: :bogus7, action: :stop}, create_paths: true
+    {:ok, _} = Hk.add %{paths: [path], app: :bogus7, action: :stop}, create_paths: true
 
     # check mtime stays the same
     mtime2 = path |> H.get_file_mtime
