@@ -3,7 +3,7 @@ defmodule Harakiri.Mixfile do
 
   def project do
     [app: :harakiri,
-     version: "1.0.1",
+     version: "1.0.2",
      elixir: ">= 1.0.0",
      package: package,
      description: """

@@ -108,6 +108,10 @@ Harakiri.add %{paths: ["file1","file2"],
 
 ## Changelog
 
+### 1.0.2
+
+* Avoid Elixir 1.3 warnings
+
 ### 1.0.1
 
 * Do not touch already existing files on start
