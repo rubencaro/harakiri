@@ -8,7 +8,8 @@ defmodule Harakiri.Mixfile do
      package: package,
      description: """
         Help applications do things to themselves.
-      """]
+      """,
+     deps: [{:ex_doc, ">= 0.0.0", only: :dev}]]
   end
 
   def application do
