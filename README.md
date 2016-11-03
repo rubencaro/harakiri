@@ -26,7 +26,7 @@ First of all, __add it to your `applications` list__ to ensure it's up before yo
 Then add to your `deps` like this:
 
 ```elixir
-{:harakiri, ">= 1.0.0"}
+{:harakiri, ">= 1.1.0"}
 ```
 
 Add an _action group_ like this:
@@ -108,7 +108,7 @@ Harakiri.add %{paths: ["file1","file2"],
 
 ## Changelog
 
-### master
+### 1.1.0
 
 * Add support for async firings
 * Make more noise when given function fails
