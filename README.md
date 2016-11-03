@@ -108,6 +108,11 @@ Harakiri.add %{paths: ["file1","file2"],
 
 ## Changelog
 
+### master
+
+* Add support for async firings
+* Make more noise when given function fails
+
 ### 1.0.2
 
 * Avoid Elixir 1.3 warnings
