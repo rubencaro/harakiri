@@ -91,8 +91,18 @@ defmodule Harakiri.Worker do
     Fire the given anonymous function for the given ActionGroup
   """
   def fire(fun, data) when is_function(fun) do
-    res = fun.(data)
-    IO.puts "Running requested function... #{inspect res}"
+    Task.start_link(fn ->
+      try do
+        IO.puts "Running requested function..."
+        res = fun.(data)
+        IO.puts "Ran requested function: #{inspect res}"
+      rescue
+        x -> IO.puts "Error running requested function: #{inspect x}, backtrace: #{inspect System.stacktrace}"
+      catch
+        x -> IO.puts "Error running requested function: #{inspect x}"
+      end
+    end)
+
     :ok
   end
 
