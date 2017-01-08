@@ -3,9 +3,9 @@ defmodule Harakiri.Mixfile do
 
   def project do
     [app: :harakiri,
-     version: "1.1.0",
+     version: "1.1.1",
      elixir: ">= 1.0.0",
-     package: package,
+     package: package(),
      description: """
         Help applications do things to themselves.
       """,

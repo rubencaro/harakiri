@@ -108,6 +108,10 @@ Harakiri.add %{paths: ["file1","file2"],
 
 ## Changelog
 
+### 1.1.1
+
+* Remove Elixir 1.4 warnings
+
 ### 1.1.0
 
 * Add support for async firings
