@@ -28,6 +28,15 @@ defmodule Harakiri do
   def add(data, opts \\ []) when is_map(data), do: data |> H.digest_data |> H.insert(opts)
 
   @doc """
+    Run given `fun` or `action` when given `path` is touched.
+  """
+  def monitor(path, fun, opts \\ [])
+  def monitor(path, fun, opts) when is_binary(path) and is_function(fun),
+    do: %{paths: [path], action: fun} |> add(opts)
+  def monitor(path, action, opts) when is_binary(path) and is_atom(action),
+    do: %{paths: [path], action: action} |> add(opts)
+
+  @doc """
     Get/set all Harakiri state
   """
   def state do

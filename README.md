@@ -26,24 +26,29 @@ First of all, __add it to your `applications` list__ to ensure it's up before yo
 Then add to your `deps` like this:
 
 ```elixir
-{:harakiri, ">= 1.1.0"}
+{:harakiri, ">= 1.2.0"}
 ```
 
-Add an _action group_ like this:
+Add an _monitor_ like this:
+
+```elixir
+Harakiri.monitor "/path/to/tmp/file", &MyModule.myfun
+```
+
+Or an _action group_ like this:
 
 ```elixir
 Harakiri.add %{paths: ["file1","file2"], action: &MyModule.myfun}
 ```
 
-You are done. That would run `MyModule.myfun` when `file1` or `file2` are touched. All given files (`file1`, `file2`, etc.) must exist, unless you give the option `:create_paths`. Then all given paths will be created if they do not already exist.
+You are done. That would run `MyModule.myfun` when `file1` (or `file2`) is touched. All given files (`file1`, `file2`, etc.) must exist, unless you give the option `:create_paths`. Then all given paths will be created if they do not already exist.
 
 ## Whole VM restart
 
 If your app is the main one in the Erlang node, then you may consider a whole `:restart`:
 
 ```elixir
-Harakiri.add %{paths: ["/path/to/tmp/restart"],
-               action: :restart}
+Harakiri.monitor "/path/to/tmp/restart", :restart
 ```
 
 That would restart the VM. I.e. stop every application and start them again. __All without stopping the running node__, so it's fast enough for most cases. It tipically takes around one second. See [init.restart/0](http://www.erlang.org/doc/man/init.html#restart-0).
@@ -80,16 +85,13 @@ The `:restart` action is suited for a project deployed as the main application i
 The `:stop` and `reload` actions are suited for quick operations over a single application, not its dependencies. For instance, `:stop` unloads and deletes the app's entry from path. No other application is stopped and removed from path.
 
 ```elixir
-Harakiri.add %{paths: ["file1","file2"],
-               app: :myapp,
-               action: :stop}
+Harakiri.monitor "file1", :stop
 ```
 
 `:reload` will ensure all dependencies are started before the app as it uses `ensure_all_started`, but it will not bother adding them to the path. So any dependency that changed will most probably not start because it will be missing from path.
 
 ```elixir
-Harakiri.add %{paths: ["file1","file2"],
-               app: :myapp,
+Harakiri.add %{paths: ["file1"],
                action: :reload,
                lib_path: "path"}
 ```
@@ -107,6 +109,11 @@ Harakiri.add %{paths: ["file1","file2"],
 * Deeper test, complete deploy/upgrade/reload simulation
 
 ## Changelog
+
+### 1.2.0
+
+* Add `monitor` for simpler use
+* Remove Elixir 1.5 warnings
 
 ### 1.1.1
 

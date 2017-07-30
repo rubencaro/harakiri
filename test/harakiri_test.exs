@@ -33,6 +33,17 @@ defmodule HarakiriTest do
     assert 2 == Enum.count(Hk.state, fn(ag)-> ag.app in [:bogus, :bogus2] end)
   end
 
+  test "simple signature works as well" do
+    # the simpler signature works as well
+    {:ok, k1} = Hk.monitor "/tmp/bogus61", :stop
+    {:ok, k2} = Hk.monitor "/tmp/bogus62", fn(_) -> :ok end
+    assert %{paths: [path1], action: :stop} = H.lookup(k1)
+    assert path1[:path] == "/tmp/bogus61"
+    assert %{paths: [path2], action: fun} = H.lookup(k2)
+    assert path2[:path] == "/tmp/bogus62"
+    assert is_function(fun)
+  end
+
   test "fires given action when touching one of given files" do
     # create the watched file
     :os.cmd 'touch /tmp/bogus3'
