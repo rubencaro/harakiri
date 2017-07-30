@@ -51,7 +51,7 @@ defmodule Harakiri.Helpers do
   @doc """
     Get the key to be used as on the ETS table
   """
-  def get_key(data), do: [data.app, data.action] |> inspect |> to_char_list
+  def get_key(data), do: [data.app, data.action] |> inspect |> to_charlist
 
   @doc """
     Insert given data into `:harakiri_table`.

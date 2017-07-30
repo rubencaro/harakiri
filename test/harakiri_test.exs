@@ -96,7 +96,7 @@ defmodule HarakiriTest do
   test "does not touch existing paths on start" do
     # create file and get initial mtime
     path = "/tmp/bogus7"
-    "touch #{path}" |> to_char_list |> :os.cmd
+    "touch #{path}" |> to_charlist |> :os.cmd
     mtime = path |> H.get_file_mtime
 
     # get Harakiri look over it passing `create_paths`
